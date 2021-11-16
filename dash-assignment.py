@@ -1,4 +1,5 @@
 import dash
+from pandas.io.formats.style import Styler
 import plotly.express as px
 import dash_core_components as dcc
 import dash_html_components as html
@@ -67,7 +68,7 @@ def update_input(input):
                     items_dict[f] = 1
 
             df[f'{key}-{i}-Altered']  = df[key].map(lambda x: items_dict[x])
-    miles_dict = {'00K-15K': 0, '16K-20K': 1, '21K+' : 2}
+    miles_dict = {'00K-15K': 1, '16K-20K': 2, '21K+' : 3}
     df['Miles-Altered'] = df['Annual Miles'].map(lambda x: miles_dict[x])
     # adds all columns to options for Y axis
     row_names = df.columns.tolist()
@@ -111,16 +112,16 @@ def update_graph_1(aggregate_type, x_axis, y_axis):
                 { 'x' : df[x_axis], 'y' :df[y_axis], 'type': 'bar', 'name' : f'{y_axis} Bar Chart'}
                 ],
                 'layout' : {
-                    'title' : f'Simple {y_axis} Bar Chart'
+                    'title' : f'Simple{x_axis}-{y_axis} Bar Chart'
                 }
             }
         else:
             figure = {
                 'data' : [
-                { 'x' : df[x_axis], 'y' :df[f'{x_axis}_transformed'], 'type': 'bar', 'name' : f'{y_axis} Bar Chart'}
+                { 'x' : df[x_axis].unique(), 'y' :df[f'{x_axis}_transformed'].unique(), 'type': 'bar', 'name' : f'{y_axis} Bar Chart'}
                 ],
                 'layout' : {
-                    'title' : f'Simple {y_axis} Bar Chart'
+                    'title' : f'Simple {x_axis}-{y_axis} Bar Chart'
                 }
             }
         return figure
@@ -134,11 +135,10 @@ boxplot_layout = (
                 children=[
                     html.H1("Segmented Portfolio Analysis",
                             style={
-                               
+                               'text-align' : 'center'
                             }
                             ),
                 ],
-
             ),
             dbc.Row(
                 [
@@ -170,11 +170,14 @@ boxplot_layout = (
                                                                                 ],
                                                                                 value="sum",
                                                                                 style={
-                                                                                    "width" : "50%"
-                                                                                    
+                                                                                    'width' : '90%',
+                                                                                    "color" : "black"
                                                                                 },
                                                                             )
-                                                                        ],
+                                                                        ],                                                                   
+                                                                        style={
+                                                                    'width' : '30%'
+                                                                },
                                                                     ),
                                                                     dbc.Col(
                                                                         [
@@ -182,22 +185,30 @@ boxplot_layout = (
                                                                                 # This dropdown should include all columns from the data
                                                                                 id="y-axis-dropdown",
                                                                                 style={
-                                                                                    "width" : "50%"
+                                                                                    'width' : '90%',
+                                                                                    "color" : "black"
                                                                                     
                                                                                 },
                                                                             )
-                                                                        ],
+                                                                        ],                                                                     
+                                                                        style={
+                                                                    'width' : '30%'
+                                                                },
                                                                     ),
                                                                     dbc.Col(
                                                                         [
                                                                             html.Label(
                                                                                 "by",
                                                                                 style={
-                                                                                    
+                                                                                    'font-size' : '1.5rem',
+                                                                                    "color" : "black"
                                                                                 }
 
                                                                             )
-                                                                        ],
+                                                                        ],                                                                        
+                                                                        style={
+                                                                    'width' : '10%'
+                                                                },
                                                                     ),
                                                                     dbc.Col(
                                                                         [
@@ -205,13 +216,19 @@ boxplot_layout = (
                                                                                 # This dropdown should include all columns from the data
                                                                                 id="x-axis-dropdown",
                                                                                 style={
-                                                                                    "width" : "50%"
-                                                                                    
+                                                                                    'width' : '90%',
+                                                                                    "color" : "black"
                                                                                 },
                                                                             )
                                                                         ],
+                                                                        style={
+                                                                    'width' : '30%'
+                                                                },
                                                                     ),
                                                                 ],
+                                                                style={
+                                                                    'display' : 'flex'
+                                                                },
                                                             )
                                                         )
                                                     )
@@ -231,7 +248,8 @@ boxplot_layout = (
                         ]
                     )
                     ])
-        ]
+        ],
+         
 ))
 
 app.layout = boxplot_layout 
