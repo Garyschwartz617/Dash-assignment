@@ -30,30 +30,26 @@ def create_grouped_df(df_in, group_column_name, target_column, aggregate_type):
 """
 Change the path below according to the location of the data file
 """
-# C:\Users\talc\Documents\pricing data.csv
-df = pd.read_csv(r"/Users/garyschwartz/Desktop/Dash Assignment - Files/Pricing Data.csv")
-# miles_dict = {'00K-15K': 0, '16K-20K': 1, '21K+' : 2}
-# df['Miles-transformed'] = df['Annual Miles'].map(lambda x: miles_dict[x])
-# fuel_dict = {'Gasoline': 0, 'Diesel':1}
-# df['Fuel-diesel-transformed'] = df['Fuel Type'].map(lambda x: fuel_dict[x])
-# fuel_dict = {'Gasoline': 1, 'Diesel':0}
-# df['Fuel-gasoline-transformed'] = df['Fuel Type'].map(lambda x: fuel_dict[x])
+df = pd.read_csv(r"/Users/garyschwartz/Desktop/Dash-Assignment-Files/Pricing Data.csv")
 
-
+# Automatically update X axis options
 @app.callback(
     Output( component_id="x-axis-dropdown", component_property="options"),
     [Input(component_id='aggregate-dropdown', component_property='value')],
 )
 def update_input(input):
-    row_names = df.columns.tolist()
+    ddf = df
+    row_names = ddf.columns.tolist()
     lst = [{'label': i, 'value': i} for i in row_names]
     return lst
 
+# Automatically update Y axis options
 @app.callback(
     Output( component_id="y-axis-dropdown", component_property="options"),
     [Input(component_id='aggregate-dropdown', component_property='value')],
 )
 def update_input(input):
+    # adds in all nominal and numeric variables that are not numbers as columns
     dicti = {
         'Fuel Type' : ['Gasoline', 'Diesel'],
         'Gender' : [ 'M', 'F' ],
@@ -70,40 +66,15 @@ def update_input(input):
                 if i == f:
                     items_dict[f] = 1
 
-            df[f'{key}-{i}-transformed']  = df[key].map(lambda x: items_dict[x])
+            df[f'{key}-{i}-Altered']  = df[key].map(lambda x: items_dict[x])
     miles_dict = {'00K-15K': 0, '16K-20K': 1, '21K+' : 2}
-    df['Miles-transformed'] = df['Annual Miles'].map(lambda x: miles_dict[x])
-    lst = []
+    df['Miles-Altered'] = df['Annual Miles'].map(lambda x: miles_dict[x])
+    # adds all columns to options for Y axis
     row_names = df.columns.tolist()
     lst = [{'label': i, 'value': i} for i in row_names]
-    # for i in df.columns.tolist():
-    #     dicti = {}
-    #     dicti['label'] = i
-    #     dicti['value'] = i
-    #     lst.append(dicti)
-
     return lst
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#  automaticallt updates graphs depending on agrigater and if nominal value or not
 @app.callback(
     Output("graph-figure", "figure"),
     Input("aggregate-dropdown", "value"),
@@ -114,17 +85,13 @@ def update_graph_1(aggregate_type, x_axis, y_axis):
     if aggregate_type == 'average':
         means = df[[y_axis]].groupby(df[x_axis]).mean()
         df[f'{x_axis}_transformed'] = df[x_axis].apply(lambda x: means.loc[x, y_axis])
-        # df[[x_axis, 'Age_transformed']].head()
     else:
         means = df[[y_axis]].groupby(df[x_axis]).sum()
-        print(means)
         df[f'{x_axis}_transformed'] = df[x_axis].apply(lambda x: means.loc[x, y_axis])
-        # df[[x_axis, 'Age_transformed']].head()
-    if x_axis not in ['Annual Miles','Car Group','Fuel Type','Gender','Installments','Marital Status','Regional Mlass']:
+    if x_axis not in ['Annual Miles','Car Group','Fuel Type','Gender','Installments','Marital Status','Regional Mlass', 'Year']:
         figure = {
                 'data' : [
                     go.Scatter(
-                    # dy =means,
                     x = df[x_axis],
                     y = df[f'{x_axis}_transformed'],
                     mode = 'markers'    
@@ -148,9 +115,6 @@ def update_graph_1(aggregate_type, x_axis, y_axis):
                 }
             }
         else:
-            # df['means'] = df[[f'{x_axis}_transformed']].groupby(df[x_axis]).count()
-            # df[f'{x_axis}_transformeded'] = df[x_axis].apply(lambda x: means.loc[x, f'{x_axis}_transformed'])
-
             figure = {
                 'data' : [
                 { 'x' : df[x_axis], 'y' :df[f'{x_axis}_transformed'], 'type': 'bar', 'name' : f'{y_axis} Bar Chart'}
@@ -217,42 +181,10 @@ boxplot_layout = (
                                                                             dcc.Dropdown(
                                                                                 # This dropdown should include all columns from the data
                                                                                 id="y-axis-dropdown",
-                                                                                # options = [
-                                                                                #     # {'label' : 'Age', 'value' : 'Age' },
-                                                                                #     # {'label' : 'Tenure', 'value' : 'Tenure' },
-                                                                                #     # {'label' : 'Annual Miles', 'value' : 'Annual Miles' },
-                                                                                #     # {'label' : 'Car Age', 'value' : 'Car Age' },
-                                                                                #     # {'label' : 'Car Group', 'value' : 'Car Group' },
-                                                                                #     # {'label' : 'Car Value', 'value' : 'Car Value' },
-                                                                                #     # {'label' : 'Car Weight', 'value' : 'Car Weight' },
-                                                                                #     # {'label' : 'Fuel Type', 'value' : 'Fuel Type' },
-                                                                                #     # {'label' : 'Gender', 'value' : 'Gender' },
-                                                                                #     # {'label' : 'Installments', 'value' : 'Installments' },
-                                                                                #     # {'label' : 'Marital Status', 'value' : 'Marital Status' },
-                                                                                #     # {'label' : 'Regional Mlass', 'value' : 'Regional Mlass' },
-                                                                                #     # {'label' : 'Risk Class', 'value' : 'Risk Class' },
-                                                                                #     # {'label' : 'Year', 'value' : 'Year' },
-                                                                                #     # {'label' : 'Variable Cost', 'value' : 'Variable Cost' },
-                                                                                #     # {'label' : 'Premium', 'value' : 'Premium' },
-                                                                                #     # {'label' : 'Previous Premium', 'value' : 'Previous Premium' },
-                                                                                #     # {'label' : 'Margin Parameter', 'value' : 'Margin Parameter' },
-                                                                                #     # {'label' : 'Renewal Demand', 'value' : 'Renewal Demand' },
-                                                                                #     # {'label' : 'Core Earnings', 'value' : 'Core Earnings' },
-                                                                                #     # {'label' : 'Actuarial Cost Parameter', 'value' : 'Actuarial Cost Parameter' },
-                                                                                #     # {'label' : 'Base Premium', 'value' : 'Base Premium' },
-                                                                                #     # {'label' : 'Individual Discount', 'value' : 'Individual Discount' },
-                                                                                #     # {'label' : 'Tax', 'value' : 'Tax' },
-                                                                                #     # {'label' : 'Fuel Type Gasoline', 'value' : 'Fuel-gasoline-transformed' },
-                                                                                #     # {'label' : 'Fuel Type Diesel', 'value' : 'Fuel-diesel-transformed' },
-                                                                                # ],
-                                                                                # value= 'Age' ,
                                                                                 style={
                                                                                     "width" : "50%"
                                                                                     
                                                                                 },
-                                                                                
-
-
                                                                             )
                                                                         ],
                                                                     ),
@@ -272,32 +204,6 @@ boxplot_layout = (
                                                                             dcc.Dropdown(
                                                                                 # This dropdown should include all columns from the data
                                                                                 id="x-axis-dropdown",
-                                                                                # options = [
-                                                                                    # {'label' : 'Age', 'value' : 'Age' },
-                                                                                    # {'label' : 'Tenure', 'value' : 'Tenure' },
-                                                                                    # {'label' : 'Annual Miles', 'value' : 'Annual Miles' },
-                                                                                    # {'label' : 'Car Age', 'value' : 'Car Age' },
-                                                                                    # {'label' : 'Car Group', 'value' : 'Car Group' },
-                                                                                    # {'label' : 'Car Value', 'value' : 'Car Value' },
-                                                                                    # {'label' : 'Car Weight', 'value' : 'Car Weight' },
-                                                                                    # {'label' : 'Fuel Type', 'value' : 'Fuel Type' },
-                                                                                    # {'label' : 'Gender', 'value' : 'Gender' },
-                                                                                    # {'label' : 'Installments', 'value' : 'Installments' },
-                                                                                    # {'label' : 'Marital Status', 'value' : 'Marital Status' },
-                                                                                    # {'label' : 'Regional Mlass', 'value' : 'Regional Mlass' },
-                                                                                    # {'label' : 'Risk Class', 'value' : 'Risk Class' },
-                                                                                    # {'label' : 'Year', 'value' : 'Year' },
-                                                                                    # {'label' : 'Variable Cost', 'value' : 'Variable Cost' },
-                                                                                    # {'label' : 'Premium', 'value' : 'Premium' },
-                                                                                    # {'label' : 'Previous Premium', 'value' : 'Previous Premium' },
-                                                                                    # {'label' : 'Margin Parameter', 'value' : 'Margin Parameter' },
-                                                                                    # {'label' : 'Renewal Demand', 'value' : 'Renewal Demand' },
-                                                                                    # {'label' : 'Core Earnings', 'value' : 'Core Earnings' },
-                                                                                    # {'label' : 'Actuarial Cost Parameter', 'value' : 'Actuarial Cost Parameter' },
-                                                                                    # {'label' : 'Base Premium', 'value' : 'Base Premium' },
-                                                                                    # {'label' : 'Individual Discount', 'value' : 'Individual Discount' },
-                                                                                    # {'label' : 'Tax', 'value' : 'Tax' },
-                                                                                # ],
                                                                                 style={
                                                                                     "width" : "50%"
                                                                                     
@@ -326,12 +232,7 @@ boxplot_layout = (
                     )
                     ])
         ]
-
-
 ))
-
-
-# app.layout = boxplot_layout
 
 app.layout = boxplot_layout 
 
