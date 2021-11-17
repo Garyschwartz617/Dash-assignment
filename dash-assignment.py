@@ -8,29 +8,11 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.graph_objs as go
 
-"""
-...
-"""
-
 
 app = dash.Dash()
 app.config.suppress_callback_exceptions=True
 
 
-
-def create_grouped_df(df_in, group_column_name, target_column, aggregate_type):
-    """
-    Groups the data by the selected columns and aggregaion types.
-    Returns a new df with the grouped data.
-    """
-
-    """
-    complete...
-    """
-
-"""
-Change the path below according to the location of the data file
-"""
 df = pd.read_csv(r"/Users/garyschwartz/Desktop/Dash-Assignment-Files/Pricing Data.csv")
 
 # Automatically update X axis options
@@ -99,7 +81,7 @@ def update_graph_1(aggregate_type, x_axis, y_axis):
                     )
                 ],
                 'layout' : go.Layout(
-                    title = f'{x_axis}-{y_axis} scatter points',
+                    title = f'{x_axis} - {y_axis} scatter points',
                     xaxis = {'title' : x_axis},
                     yaxis = {'title' : y_axis }
                 )
@@ -109,10 +91,10 @@ def update_graph_1(aggregate_type, x_axis, y_axis):
         if aggregate_type != 'average':
             figure = {
                 'data' : [
-                { 'x' : df[x_axis], 'y' :df[y_axis], 'type': 'bar', 'name' : f'{y_axis} Bar Chart'}
+                { 'x' : df[x_axis].unique(), 'y' :df[f'{x_axis}_transformed'].unique(), 'type': 'bar', 'name' : f'{y_axis} Bar Chart'}
                 ],
                 'layout' : {
-                    'title' : f'Simple{x_axis}-{y_axis} Bar Chart'
+                    'title' : f'Simple{y_axis} - {x_axis} Bar Chart',
                 }
             }
         else:
@@ -121,7 +103,7 @@ def update_graph_1(aggregate_type, x_axis, y_axis):
                 { 'x' : df[x_axis].unique(), 'y' :df[f'{x_axis}_transformed'].unique(), 'type': 'bar', 'name' : f'{y_axis} Bar Chart'}
                 ],
                 'layout' : {
-                    'title' : f'Simple {x_axis}-{y_axis} Bar Chart'
+                    'title' : f'Simple {y_axis} - {x_axis} Bar Chart',
                 }
             }
         return figure
